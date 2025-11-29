@@ -1,0 +1,46 @@
+@echo off
+:: Win10 一键解决资源管理器卡顿（快速启动 + 索引 + 缩略图）
+:: 作者：你（可以写你的 GitHub 名）
+:: 2025年开源版
+
+echo.
+echo ========================================
+echo   Win10 资源管理器卡顿终极修复脚本
+echo   关闭快速启动 + 禁用索引 + 清缩略图缓存
+echo ========================================
+echo.
+
+:: 提升为管理员权限
+net session >nul 2>&1
+if %errorLevel% == 0 (
+    echo 已获取管理员权限
+) else (
+    echo 请以管理员身份运行此脚本！
+    pause
+    exit /b
+)
+
+echo.
+echo [1/5] 正在关闭快速启动（永久关闭休眠文件）...
+powercfg -h off >nul 2>&1
+
+echo [2/5] 正在停止并禁用 Windows Search 服务...
+sc stop WSearch >nul 2>&1
+sc config WSearch start=disabled >nul 2>&1
+
+echo [3/5] 正在关闭缩略图缓存...
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "DisableThumbnailCache" /t REG_DWORD /d 1 /f >nul
+
+echo [4/5] 正在清除缩略图缓存...
+del /f /q "%LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db" >nul 2>&1
+
+echo [5/5] 正在重启资源管理器...
+taskkill /f /im explorer.exe >nul 2>&1
+start explorer.exe
+
+echo.
+echo ========================================
+echo   全部完成！资源管理器已秒开！
+echo   VFX5-cmd
+echo ========================================
+pause
